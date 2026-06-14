@@ -1,0 +1,1 @@
+# k-t-phane_otomasyon_sistemi
