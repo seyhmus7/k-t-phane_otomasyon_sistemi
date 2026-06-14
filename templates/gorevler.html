@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Haftalık Görevler - Kulüp Yönetim Sistemi{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1 text-dark">Haftalık Görevler</h2>
+        <p class="text-muted mb-0">Tüm kulüpler için planlanan aktif görevler ve durumları.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="taskSearch" class="form-control border-start-0" placeholder="Görev ara...">
+        </div>
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="tasksTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="width: 80px;">ID</th>
+                        <th scope="col">Görev Tanımı</th>
+                        <th scope="col">İlgili Kulüp</th>
+                        <th scope="col">Son Tarih</th>
+                        <th scope="col">Durum</th>
+                        {% if session.get('kullanici_id') %}
+                            <th scope="col" class="text-end" style="width: 150px;">İşlemler</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if gorevler %}
+                        {% for gorev in gorevler %}
+                            <tr>
+                                <td class="fw-semibold">#{{ gorev.id }}</td>
+                                <td class="fw-medium">{{ gorev.gorev_tanimi }}</td>
+                                <td>
+                                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 fs-7">
+                                        {{ gorev.kulup_ad }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-muted small">
+                                        <i class="bi bi-clock me-1"></i> {{ gorev.son_tarih }}
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if gorev.durum == 'Tamamlandı' %}
+                                        <span class="badge bg-success rounded-pill px-3 py-1"><i class="bi bi-check-circle-fill me-1"></i>Tamamlandı</span>
+                                    {% elif gorev.durum == 'Yapılıyor' %}
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1"><i class="bi bi-hourglass-split me-1"></i>Yapılıyor</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary rounded-pill px-3 py-1"><i class="bi bi-circle me-1"></i>Yapılacak</span>
+                                    {% endif %}
+                                </td>
+                                {% if session.get('kullanici_id') %}
+                                    <td class="text-end">
+                                        {% if gorev.kulup_id in yonetilen_kulupler %}
+                                            <a href="{{ url_for('gorev_duzenle', id=gorev.id) }}" class="btn btn-outline-primary btn-sm rounded-3 px-2 me-1" title="Düzenle"><i class="bi bi-pencil"></i></a>
+                                            <a href="{{ url_for('gorev_sil', id=gorev.id) }}" class="btn btn-outline-danger btn-sm rounded-3 px-2" onclick="return confirm('Bu görevi silmek istediğinize emin misiniz?')" title="Sil"><i class="bi bi-trash"></i></a>
+                                        {% else %}
+                                            <span class="text-muted small">Yetki Yok</span>
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="bi bi-list-check fs-2 d-block mb-2 opacity-50"></i>
+                                Kayıtlı görev bulunmuyor.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('taskSearch').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#tasksTable tbody tr');
+        rows.forEach(row => {
+            const name = row.cells[1].textContent.toLowerCase();
+            const club = row.cells[2].textContent.toLowerCase();
+            const status = row.cells[4].textContent.toLowerCase();
+            if (name.includes(query) || club.includes(query) || status.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}

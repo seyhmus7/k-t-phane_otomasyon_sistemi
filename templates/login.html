@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Giriş Yap - Üniversite Kulüp Yönetim Sistemi{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-5">
+        <div class="card border-0 shadow-lg rounded-4 overflow-hidden">
+            <div class="bg-primary py-4 text-center text-white">
+                <i class="bi bi-shield-lock-fill fs-1"></i>
+                <h3 class="fw-bold mt-2">Yönetici Girişi</h3>
+                <p class="mb-0 text-white-50 small">Sistemi yönetmek için giriş bilgilerinizi kullanın.</p>
+            </div>
+            <div class="card-body p-4 p-md-5">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="kullanici_adi" class="form-label fw-semibold">Kullanıcı Adı</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person-fill text-muted"></i></span>
+                            <input type="text" class="form-control bg-light border-start-0" id="kullanici_adi" name="kullanici_adi" placeholder="Kullanıcı adı girin..." required>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label for="sifre" class="form-label fw-semibold">Şifre</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-lock-fill text-muted"></i></span>
+                            <input type="password" class="form-control bg-light border-start-0" id="sifre" name="sifre" placeholder="Şifre girin..." required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-2 fw-semibold fs-5 rounded-3 shadow-sm">Giriş Yap</button>
+                </form>
+            </div>
+            <div class="card-footer bg-light text-center py-3 border-0">
+                <a href="{{ url_for('index') }}" class="text-decoration-none text-muted small"><i class="bi bi-arrow-left me-1"></i>Ana Sayfaya Dön</a>
+            </div>
+        </div>
+        
+        <div class="card mt-4 border-0 shadow-sm rounded-3 bg-info-subtle border-start border-4 border-info">
+            <div class="card-body text-dark py-3">
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-info-circle-fill text-info fs-4 me-2"></i>
+                    <div>
+                        <h6 class="fw-bold mb-0">Hızlı Test Girişleri:</h6>
+                        <small class="d-block">Süper Admin (Baş Admin): <strong>admin</strong> / <strong>admin123</strong></small>
+                        <small class="d-block">Yazılım Kulübü Yöneticisi: <strong>yazilim_admin</strong> / <strong>yazilim123</strong></small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

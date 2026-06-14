@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ 'Öğrenci Bilgilerini Düzenle' if ogrenci else 'Yeni Üye Ekle' }} - Kulüp Yönetim Sistemi{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <h3 class="fw-bold text-dark mb-0">{{ 'Öğrenci Bilgilerini Düzenle' if ogrenci else 'Yeni Üye Ekle' }}</h3>
+                <p class="text-muted small">Kulübe kayıt olacak öğrencinin kişisel ve iletişim bilgilerini girin.</p>
+            </div>
+            <div class="card-body p-4">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="ad" class="form-label fw-medium">Öğrenci Adı</label>
+                        <input type="text" class="form-control" id="ad" name="ad" value="{{ ogrenci.ad if ogrenci else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="soyad" class="form-label fw-medium">Öğrenci Soyadı</label>
+                        <input type="text" class="form-control" id="soyad" name="soyad" value="{{ ogrenci.soyad if ogrenci else '' }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="eposta" class="form-label fw-medium">E-posta Adresi</label>
+                        <input type="email" class="form-control" id="eposta" name="eposta" value="{{ ogrenci.eposta if ogrenci else '' }}" required>
+                    </div>
+                    <div class="mb-4">
+                        <label for="telefon" class="form-label fw-medium">Telefon Numarası</label>
+                        <input type="tel" class="form-control" id="telefon" name="telefon" placeholder="05XXXXXXXXX" value="{{ ogrenci.telefon if ogrenci else '' }}" required>
+                    </div>
+                    
+                    {% if kulupler %}
+                    <div class="mb-4">
+                        <label for="kulup_id" class="form-label fw-medium">Üye Olacağı Kulüp</label>
+                        <select class="form-select" id="kulup_id" name="kulup_id" required>
+                            <option value="" disabled {{ 'selected' if not ogrenci else '' }}>Kulüp Seçin...</option>
+                            {% for k in kulupler %}
+                                <option value="{{ k.id }}" {{ 'selected' if (ogrenci and ogrenci.kulup_id == k.id) or (kulup_id == k.id) else '' }}>{{ k.ad }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% else %}
+                        <input type="hidden" name="kulup_id" value="{{ kulup_id }}">
+                    {% endif %}
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary px-4 fw-medium"><i class="bi bi-save me-1"></i>Kaydet</button>
+                        <a href="{{ url_for('ogrenciler' if session.get('rol') == 'super' else 'kulup_detay', id=kulup_id) }}" class="btn btn-outline-secondary px-4">İptal</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

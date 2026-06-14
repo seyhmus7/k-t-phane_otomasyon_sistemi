@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ kulup.ad }} - Kulüp Detayları{% endblock %}
+
+{% block content %}
+<!-- Club Header -->
+<div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-white border-top border-4 border-primary">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
+        <div>
+            <h1 class="fw-bold text-dark mb-2">{{ kulup.ad }}</h1>
+            <p class="lead text-muted mb-0">{{ kulup.aciklama }}</p>
+        </div>
+        <div class="text-md-end">
+            <span class="badge bg-light text-dark border rounded-pill px-3 py-2">
+                <i class="bi bi-calendar3 me-1 text-primary"></i> Kuruluş: {{ kulup.kurulus_tarihi }}
+            </span>
+            <div class="mt-2 text-muted small">
+                <strong>{{ ogrenciler|length }}</strong> Kayıtlı Üye
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Back button & Admin Tools -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <a href="{{ url_for('index') }}" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1">
+        <i class="bi bi-arrow-left"></i> Kulüp Listesine Dön
+    </a>
+</div>
+
+<!-- Details Navigation (Tabs) -->
+<div class="row g-4">
+    <div class="col-lg-12">
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-white border-0 pt-4 px-4">
+                <ul class="nav nav-pills" id="detailTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="students-tab" data-bs-toggle="pill" data-bs-target="#students" type="button" role="tab" aria-controls="students" aria-selected="true">
+                            <i class="bi bi-people-fill me-2"></i>Üyeler ({{ ogrenciler|length }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="events-tab" data-bs-toggle="pill" data-bs-target="#events" type="button" role="tab" aria-controls="events" aria-selected="false">
+                            <i class="bi bi-calendar-event-fill me-2"></i>Etkinlikler ({{ etkinlikler|length }})
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="tasks-tab" data-bs-toggle="pill" data-bs-target="#tasks" type="button" role="tab" aria-controls="tasks" aria-selected="false">
+                            <i class="bi bi-list-task me-2"></i>Haftalık Görevler ({{ gorevler|length }})
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            
+            <div class="card-body p-4">
+                <div class="tab-content" id="detailTabsContent">
+                    <!-- Tab 1: Students -->
+                    <div class="tab-pane fade show active" id="students" role="tabpanel" aria-labelledby="students-tab">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-dark mb-0">Kayıtlı Öğrenci Listesi</h5>
+                            {% if is_admin %}
+                                <a href="{{ url_for('ogrenci_ekle', kulup_id=kulup.id) }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
+                                    <i class="bi bi-plus-circle"></i> Yeni Üye Ekle
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" style="width: 80px;">ID</th>
+                                        <th scope="col">Ad Soyad</th>
+                                        <th scope="col">E-posta</th>
+                                        <th scope="col">Telefon</th>
+                                        {% if is_admin %}
+                                            <th scope="col" class="text-end" style="width: 150px;">İşlemler</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if ogrenciler %}
+                                        {% for ogrenci in ogrenciler %}
+                                            <tr>
+                                                <td class="fw-semibold">#{{ ogrenci.id }}</td>
+                                                <td class="fw-medium">{{ ogrenci.ad }} {{ ogrenci.soyad }}</td>
+                                                <td><a href="mailto:{{ ogrenci.eposta }}" class="text-decoration-none">{{ ogrenci.eposta }}</a></td>
+                                                <td>{{ ogrenci.telefon }}</td>
+                                                {% if is_admin %}
+                                                    <td class="text-end">
+                                                        <a href="{{ url_for('ogrenci_duzenle', id=ogrenci.id) }}" class="btn btn-outline-primary btn-sm rounded-3 px-2 me-1" title="Düzenle"><i class="bi bi-pencil"></i></a>
+                                                        <a href="{{ url_for('ogrenci_sil', id=ogrenci.id) }}" class="btn btn-outline-danger btn-sm rounded-3 px-2" onclick="return confirm('Bu öğrenciyi kulüpten silmek istediğinize emin misiniz?')" title="Sil"><i class="bi bi-trash"></i></a>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted">
+                                                <i class="bi bi-people fs-2 d-block mb-2 opacity-50"></i>
+                                                Bu kulübe henüz kayıtlı öğrenci bulunmuyor.
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab 2: Events -->
+                    <div class="tab-pane fade" id="events" role="tabpanel" aria-labelledby="events-tab">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-dark mb-0">Etkinlik Programı</h5>
+                            {% if is_admin %}
+                                <a href="{{ url_for('etkinlik_ekle', kulup_id=kulup.id) }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
+                                    <i class="bi bi-plus-circle"></i> Yeni Etkinlik Ekle
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" style="width: 80px;">ID</th>
+                                        <th scope="col">Etkinlik Adı</th>
+                                        <th scope="col">Tarih</th>
+                                        <th scope="col">Yer</th>
+                                        {% if is_admin %}
+                                            <th scope="col" class="text-end" style="width: 150px;">İşlemler</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if etkinlikler %}
+                                        {% for etkinlik in etkinlikler %}
+                                            <tr>
+                                                <td class="fw-semibold">#{{ etkinlik.id }}</td>
+                                                <td class="fw-medium">{{ etkinlik.etkinlik_adi }}</td>
+                                                <td>
+                                                    <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill">
+                                                        <i class="bi bi-calendar-event me-1"></i> {{ etkinlik.tarih }}
+                                                    </span>
+                                                </td>
+                                                <td><i class="bi bi-geo-alt-fill text-danger me-1"></i>{{ etkinlik.yer }}</td>
+                                                {% if is_admin %}
+                                                    <td class="text-end">
+                                                        <a href="{{ url_for('etkinlik_duzenle', id=etkinlik.id) }}" class="btn btn-outline-primary btn-sm rounded-3 px-2 me-1" title="Düzenle"><i class="bi bi-pencil"></i></a>
+                                                        <a href="{{ url_for('etkinlik_sil', id=etkinlik.id) }}" class="btn btn-outline-danger btn-sm rounded-3 px-2" onclick="return confirm('Bu etkinliği programdan silmek istediğinize emin misiniz?')" title="Sil"><i class="bi bi-trash"></i></a>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted">
+                                                <i class="bi bi-calendar2-x fs-2 d-block mb-2 opacity-50"></i>
+                                                Planlanmış bir etkinlik bulunmuyor.
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <!-- Tab 3: Tasks -->
+                    <div class="tab-pane fade" id="tasks" role="tabpanel" aria-labelledby="tasks-tab">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold text-dark mb-0">Haftalık Görevler</h5>
+                            {% if is_admin %}
+                                <a href="{{ url_for('gorev_ekle', kulup_id=kulup.id) }}" class="btn btn-primary btn-sm d-flex align-items-center gap-1 shadow-sm">
+                                    <i class="bi bi-plus-circle"></i> Yeni Görev Ekle
+                                </a>
+                            {% endif %}
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col" style="width: 80px;">ID</th>
+                                        <th scope="col">Görev Tanımı</th>
+                                        <th scope="col">Son Tarih</th>
+                                        <th scope="col">Durum</th>
+                                        {% if is_admin %}
+                                            <th scope="col" class="text-end" style="width: 150px;">İşlemler</th>
+                                        {% endif %}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% if gorevler %}
+                                        {% for gorev in gorevler %}
+                                            <tr>
+                                                <td class="fw-semibold">#{{ gorev.id }}</td>
+                                                <td class="fw-medium">{{ gorev.gorev_tanimi }}</td>
+                                                <td>
+                                                    <span class="text-muted small">
+                                                        <i class="bi bi-clock me-1"></i> {{ gorev.son_tarih }}
+                                                    </span>
+                                                </td>
+                                                <td>
+                                                    {% if gorev.durum == 'Tamamlandı' %}
+                                                        <span class="badge bg-success rounded-pill px-3 py-1"><i class="bi bi-check-circle-fill me-1"></i>Tamamlandı</span>
+                                                    {% elif gorev.durum == 'Yapılıyor' %}
+                                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1"><i class="bi bi-hourglass-split me-1"></i>Yapılıyor</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary rounded-pill px-3 py-1"><i class="bi bi-circle me-1"></i>Yapılacak</span>
+                                                    {% endif %}
+                                                </td>
+                                                {% if is_admin %}
+                                                    <td class="text-end">
+                                                        <a href="{{ url_for('gorev_duzenle', id=gorev.id) }}" class="btn btn-outline-primary btn-sm rounded-3 px-2 me-1" title="Düzenle"><i class="bi bi-pencil"></i></a>
+                                                        <a href="{{ url_for('gorev_sil', id=gorev.id) }}" class="btn btn-outline-danger btn-sm rounded-3 px-2" onclick="return confirm('Bu görevi silmek istediğinize emin misiniz?')" title="Sil"><i class="bi bi-trash"></i></a>
+                                                    </td>
+                                                {% endif %}
+                                            </tr>
+                                        {% endfor %}
+                                    {% else %}
+                                        <tr>
+                                            <td colspan="5" class="text-center py-4 text-muted">
+                                                <i class="bi bi-list-check fs-2 d-block mb-2 opacity-50"></i>
+                                                Tanımlanmış haftalık görev bulunmuyor.
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

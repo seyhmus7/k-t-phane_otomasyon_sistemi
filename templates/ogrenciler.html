@@ -1,0 +1,101 @@
+{% extends 'base.html' %}
+
+{% block title %}Öğrenciler - Kulüp Yönetim Sistemi{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h2 class="fw-bold mb-1 text-dark">Kayıtlı Öğrenciler</h2>
+        <p class="text-muted mb-0">Sistemdeki tüm kayıtlı kulüp üyeleri.</p>
+    </div>
+    <div class="d-flex gap-2">
+        <div class="input-group" style="max-width: 300px;">
+            <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+            <input type="text" id="studentSearch" class="form-control border-start-0" placeholder="Öğrenci ara...">
+        </div>
+        {% if session.get('rol') == 'super' %}
+            <a href="{{ url_for('ogrenci_ekle_genel') }}" class="btn btn-primary d-flex align-items-center gap-1 shadow-sm">
+                <i class="bi bi-plus-circle-fill"></i> Yeni Üye Ekle
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle" id="studentsTable">
+                <thead class="table-light">
+                    <tr>
+                        <th scope="col" style="width: 80px;">ID</th>
+                        <th scope="col">Ad Soyad</th>
+                        <th scope="col">Kulübü</th>
+                        <th scope="col">E-posta</th>
+                        <th scope="col">Telefon</th>
+                        {% if session.get('kullanici_id') %}
+                            <th scope="col" class="text-end" style="width: 150px;">İşlemler</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if ogrenciler %}
+                        {% for ogrenci in ogrenciler %}
+                            <tr>
+                                <td class="fw-semibold">#{{ ogrenci.id }}</td>
+                                <td class="fw-medium">{{ ogrenci.ad }} {{ ogrenci.soyad }}</td>
+                                <td>
+                                    {% if ogrenci.kulup_ad %}
+                                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle rounded-pill px-3 py-2 fs-7">
+                                            {{ ogrenci.kulup_ad }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary-subtle text-secondary border border-secondary-subtle rounded-pill px-3 py-2 fs-7">
+                                            Kulüpsüz
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td><a href="mailto:{{ ogrenci.eposta }}" class="text-decoration-none">{{ ogrenci.eposta }}</a></td>
+                                <td>{{ ogrenci.telefon }}</td>
+                                {% if session.get('kullanici_id') %}
+                                    <td class="text-end">
+                                        {% if ogrenci.kulup_id in yonetilen_kulupler %}
+                                            <a href="{{ url_for('ogrenci_duzenle', id=ogrenci.id) }}" class="btn btn-outline-primary btn-sm rounded-3 px-2 me-1" title="Düzenle"><i class="bi bi-pencil"></i></a>
+                                            <a href="{{ url_for('ogrenci_sil', id=ogrenci.id) }}" class="btn btn-outline-danger btn-sm rounded-3 px-2" onclick="return confirm('Bu öğrenciyi silmek istediğinize emin misiniz?')" title="Sil"><i class="bi bi-trash"></i></a>
+                                        {% else %}
+                                            <span class="text-muted small">Yetki Yok</span>
+                                        {% endif %}
+                                    </td>
+                                {% endif %}
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="bi bi-people fs-2 d-block mb-2 opacity-50"></i>
+                                Kayıtlı öğrenci bulunmuyor.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('studentSearch').addEventListener('input', function(e) {
+        const query = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#studentsTable tbody tr');
+        rows.forEach(row => {
+            const name = row.cells[1].textContent.toLowerCase();
+            const club = row.cells[2].textContent.toLowerCase();
+            const email = row.cells[3].textContent.toLowerCase();
+            if (name.includes(query) || club.includes(query) || email.includes(query)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+</script>
+{% endblock %}
